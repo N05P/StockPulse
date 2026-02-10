@@ -7,8 +7,13 @@ import SelectField from "@/components/forms/SelectField";
 import {INVESTMENT_GOALS, PREFERRED_INDUSTRIES, RISK_TOLERANCE_OPTIONS} from "@/lib/constants";
 import {CountrySelectField} from "@/components/forms/CountrySelectField";
 import FooterLink from "@/components/forms/FooterLink";
+import {signUpWithEmail} from "@/lib/actions/auth.actions";
+import {useRouter} from "next/navigation";
+import {toast} from "sonner";
 
 const SignUp = () => {
+
+    const router = useRouter();
 
     const {
         register,
@@ -28,11 +33,23 @@ const SignUp = () => {
         mode: 'onBlur'
     }, );
 
+const onSubmit = async (data:SignUpFormData) => {
+    try{
+        const result = await signUpWithEmail(data);
+        if(result.success) router.push('/')
+    }
+    catch(err){
+        console.log(err)
+        toast.error('Sign up failed',
+            {description:err instanceof Error ? err.message : "Failed to sign up" });
+    }
+}
+
     return (
         <>
             <h1 className="form-title">Sign Up & Personalize</h1>
 
-            <form onSubmit={handleSubmit()} className="space-y-5">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 <InputField
                     name="fullName"
                     label="Full Name"
@@ -48,7 +65,7 @@ const SignUp = () => {
                     placeholder="contact@jsmastery.com"
                     register={register}
                     error={errors.email}
-                    validation={{ required: 'Email name is required', pattern: /^\w+@\w+\.\w+$/, message: 'Email address is required' }}
+                    validation={{ required: 'Email name is required', pattern: /^\w+@\w+\.\w+$/}}
                 />
 
                 <InputField

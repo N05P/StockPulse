@@ -4,9 +4,15 @@ import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import InputField from '@/components/forms/InputField';
 import FooterLink from '@/components/forms/FooterLink';
+import {signInWithEmail} from "@/lib/actions/auth.actions";
+import {toast} from "sonner";
+import {useRouter} from "next/navigation";
 
 
 const SignIn = () => {
+
+    const route = useRouter();
+
     const {
         register,
         handleSubmit,
@@ -19,12 +25,23 @@ const SignIn = () => {
         mode: 'onBlur',
     });
 
+    const onSubmit = async (data:SignInFormData) => {
+        try{
+            const result = await signInWithEmail(data);
+            if(result.success) route.push('/')
+        }
+        catch(err){
+            console.log(err)
+            toast.error('Sign up failed',
+                {description:err instanceof Error ? err.message : "Failed to sign up" });
+        }
+    }
 
     return (
         <>
             <h1 className="form-title">Welcome back</h1>
 
-            <form onSubmit={handleSubmit()} className="space-y-5">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 <InputField
                     name="email"
                     label="Email"
